@@ -81,7 +81,11 @@ JdbcColumn
 	@JdbcColumn(columnName="sort_num",defaultValue="getsort(#{name})")
 	private Integer sortNum;
 	表示如果sortNum为空 则调用数据库方法getsort()生成,而参数为该实体字段name的值
-	
+	insertIgnore
+	表示新增时忽略,即 在生成insert语句时会忽略该字段
 	updateIgnore
 	表示更新时忽略,即 在进行update操作时不理会该字段
-
+	
+	isPrimaryKey
+	是否为主键,当设置为true时表示该字段为实体主键
+	
