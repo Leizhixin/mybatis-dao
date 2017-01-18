@@ -14,9 +14,17 @@ import com.johncena.mybatisdao.annotation.EntityParent;
 import com.johncena.mybatisdao.annotation.JdbcColumn;
 import com.johncena.mybatisdao.annotation.MybatisEntity;
 import com.johncena.mybatisdao.enums.SqlOperationType;
-
+/**
+ * 主要用于框架内部代码解析自定义的注解
+ * @author johncena
+ *
+ */
 public class SqlAnnotationUtil {
-
+	/**
+	 * 根据class获取表名 class必须被@MybatisEntity注解
+	 * @param tclz
+	 * @return
+	 */
 	public static <T> String getTableName(Class<T> tclz){
 		if(!tclz.isAnnotationPresent(MybatisEntity.class)){
 			throw new IllegalStateException("entity must be annotationed by Annotation MybatisEntity ");
@@ -28,7 +36,11 @@ public class SqlAnnotationUtil {
 		}
 		return tableName;
 	}
-	
+	/**
+	 * 默认获取表名和表的列名的规则
+	 * @param srcName
+	 * @return
+	 */
 	private static String getDefaultDbName(String srcName){
 		Pattern pat = Pattern.compile("[A-Z]");
 		Matcher mat = pat.matcher(srcName);
@@ -64,15 +76,22 @@ public class SqlAnnotationUtil {
 			createAnnotatedFieldsList(fl, clz.getSuperclass(),sqlOpration);
 		}
 	}
-	
-	
-	
+	/**
+	 * 根据实体字段获取对应的数据库列
+	 * @param f
+	 * @return
+	 */
 	public static String getColumnName(Field f){
 		JdbcColumn column = f.getAnnotation(JdbcColumn.class);
 		return StringUtils.isEmpty(column.columnName())?
 				getDefaultDbName(f.getName()):column.columnName();
 	}
-	
+	/**
+	 * 根据map对象和class对象拼接条件sql语句
+	 * @param map
+	 * @param clz
+	 * @return
+	 */
 	public static <T> String getCondition(Map<String,String> map,Class<T> clz){
 		Map<String,String> jdbcMap = getFieldJdbcMap(clz);
 		StringBuilder condition = new StringBuilder(" where 1=1 ");
@@ -84,7 +103,11 @@ public class SqlAnnotationUtil {
 		}
 		return condition.toString();
 	} 
-	
+	/**
+	 * 获取属性名与数据库表字段对应的HashMap集合 key:为实体属性 value:数据库字段
+	 * @param clz
+	 * @return
+	 */
 	private static <T> Map<String,String> getFieldJdbcMap(Class<T> clz){
 		Map<String,String> jdbcMap = new HashMap<String, String>();
 		Field[] fields = clz.getDeclaredFields();
@@ -95,7 +118,11 @@ public class SqlAnnotationUtil {
 		}
 		return jdbcMap;
 	}
-	
+	/**
+	 * 获取属性名与数据库表字段对应的HashMap集合 key:数据库字段 value:为实体属性
+	 * @param clz
+	 * @return
+	 */
 	private static <T> Map<String,String> getJdbcFieldMap(Class<T> clz){
 		Map<String,String> jdbcMap = new HashMap<String, String>();
 		Field[] fields = clz.getDeclaredFields();
@@ -106,7 +133,12 @@ public class SqlAnnotationUtil {
 		}
 		return jdbcMap;
 	}
-	
+	/**
+	 * 将数据库查询的结果转换为实体
+	 * @param dbresult
+	 * @param clz
+	 * @return
+	 */
 	public static <T> T transToObject(Map<String,Object> dbresult,Class<T> clz){
 		return transToObject(dbresult, getJdbcFieldMap(clz), clz);
 	}
@@ -122,7 +154,12 @@ public class SqlAnnotationUtil {
 		}
 		return t;
 	}
-	
+	/**
+	 * 将数据库查询的结果转换为实体集合
+	 * @param dbresult
+	 * @param clz
+	 * @return
+	 */
 	public static <T> List<T> transToObjectList(List<Map<String,Object>> dbresList,Class<T> clz){
 		Map<String,String> jdbcFieldMap = getJdbcFieldMap(clz);
 		List<T> resList = new ArrayList<T>();
@@ -131,14 +168,22 @@ public class SqlAnnotationUtil {
 		}
 		return resList;
 	}
-	
+	/**
+	 * 通过class获取主键名
+	 * @param clz
+	 * @return
+	 */
 	public static <T> String getPrimaryKeyName(Class<T> clz){
 		Field f = getPkField(clz);
 		if(f!=null)
 			return f.getName();
 		throw new UnsupportedOperationException(clz.getName()+" has no primary key ");
 	}
-	
+	/**
+	 * 获取主键属性
+	 * @param tclz
+	 * @return
+	 */
 	public static Field getPkField(Class<?> tclz){
 		if(!tclz.isAnnotationPresent(MybatisEntity.class)&&!tclz.isAnnotationPresent(EntityParent.class)){
 			throw new IllegalStateException("entity must be annotationed by Annotation MybatisEntity ");
@@ -155,7 +200,12 @@ public class SqlAnnotationUtil {
 			return getPkField(tclz.getSuperclass());
 		return null;
 	}
-	
+	/**
+	 * 根据class,和排序对象集合获取排序的sql
+	 * @param clz
+	 * @param orderList
+	 * @return
+	 */
 	public static String compileOrderList(Class<?> clz,List<Order> orderList){
 		StringBuilder sql = new StringBuilder();
 		if(!orderList.isEmpty()){
